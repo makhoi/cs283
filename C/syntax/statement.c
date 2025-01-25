@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 int main() {
-    printf("Hello World!\n");
-    printf("Have a good day!\n");
-    return 0;
+    printf("Hello World!\n"); //1st statement
+    printf("Have a good day!\n"); //2nd statement
+    return 0; //3rd statement
 }
