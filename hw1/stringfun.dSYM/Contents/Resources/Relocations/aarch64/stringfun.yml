@@ -1,0 +1,13 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     stringfun
+relocations:
+  - { offsetInCU: 0x26, offset: 0x26, size: 0x8, addend: 0x0, symName: _setup_buff, symObjAddr: 0x0, symBinAddr: 0x100003380, symSize: 0x208 }
+  - { offsetInCU: 0x46, offset: 0x46, size: 0x8, addend: 0x0, symName: _setup_buff, symObjAddr: 0x0, symBinAddr: 0x100003380, symSize: 0x208 }
+  - { offsetInCU: 0xC2, offset: 0xC2, size: 0x8, addend: 0x0, symName: _count_words, symObjAddr: 0x208, symBinAddr: 0x100003588, symSize: 0x10C }
+  - { offsetInCU: 0x13E, offset: 0x13E, size: 0x8, addend: 0x0, symName: _reverse_string, symObjAddr: 0x314, symBinAddr: 0x100003694, symSize: 0xF4 }
+  - { offsetInCU: 0x1B6, offset: 0x1B6, size: 0x8, addend: 0x0, symName: _print_words, symObjAddr: 0x408, symBinAddr: 0x100003788, symSize: 0x28C }
+  - { offsetInCU: 0x242, offset: 0x242, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x694, symBinAddr: 0x100003A14, symSize: 0x31C }
+  - { offsetInCU: 0x2B0, offset: 0x2B0, size: 0x8, addend: 0x0, symName: _usage, symObjAddr: 0xA08, symBinAddr: 0x100003D88, symSize: 0x34 }
+  - { offsetInCU: 0x2D4, offset: 0x2D4, size: 0x8, addend: 0x0, symName: _print_buff, symObjAddr: 0xA3C, symBinAddr: 0x100003DBC, symSize: 0x78 }
+...

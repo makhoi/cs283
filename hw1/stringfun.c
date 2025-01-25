@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-#define BUFFER_SZ 50
+#define BUFFER_SZ 100
 
 // Function prototypes
 void usage(char *);
@@ -18,6 +18,7 @@ int setup_buff(char *buff, char *user_str, int len) {
     int count = 0;
     int space_flag = 1;  // To skip leading spaces
 
+    // Process input and remove extra spaces
     while (*src != '\0' && count < len) {
         if (isspace(*src)) {
             if (!space_flag) {
@@ -33,37 +34,51 @@ int setup_buff(char *buff, char *user_str, int len) {
         src++;
     }
 
-    // Remove trailing space if present
-    if (*(dest - 1) == ' ') {
+    while (isspace(*src)) {
+    src++;  // Skip leading spaces
+}
+
+    // Remove trailing spaces
+    if (count > 0 && *(dest - 1) == ' ') {
         dest--;
         count--;
     }
 
     // Fill the remaining buffer space with dots
-    while (count < len) {
+    while (count < len - 1) {  
+    if (*dest == '\0') {
         *dest++ = '.';
-        count++;
     }
+    count++;
+}
+
+
+    *dest = '\0';  // Null-terminate the string
 
     return count;
+
+    printf("Original Input: [%s]\n", user_str);
+    printf("Processed Buffer (after cleanup): [%s]\n", buff);
 }
+
 
 int count_words(char *buff, int len, int str_len) {
     int count = 0;
-    char *ptr = buff;
     int in_word = 0;
 
     for (int i = 0; i < str_len; i++) {
-        if (*ptr == ' ') {
+        if (buff[i] == ' ' || buff[i] == '.') {
             in_word = 0;
         } else if (!in_word) {
             in_word = 1;
             count++;
+            printf("Word detected at index %d\n", i);
         }
-        ptr++;
     }
+    printf("Final word count: %d\n", count);
     return count;
 }
+
 
 void reverse_string(char *buff, int str_len) {
     char *start = buff;
