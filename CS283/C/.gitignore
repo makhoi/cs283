@@ -1,15 +1,17 @@
 # Ignore macOS system files
 .DS_Store
 
-# Ignore compiled programs
+# Ignore compiled binary files
 myfirstprogram
 
+# Ignore folders
+Materials/
+course_resources/
+syllabus/
+
 # Ignore specific directories
-../Materials/
-../course_resources/
-../syllabus/
-../../CS360/
-../../CS380/
-../../CS383/
-../../PHYS201/
-../../STAT202/
+CS360/
+CS380/
+CS383/
+PHYS201/
+STAT202/
