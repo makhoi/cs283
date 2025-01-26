@@ -1,4 +1,7 @@
 // character can be represented by number using ASCII table
+// one single character is wrapped by single quote '' and use %c as format specifier
+// a string of text is wrapped by a double quote "" and used %s as format specifier
+// data types for both cases above: char
 
 #include <stdio.h>
 
@@ -21,7 +24,7 @@ int main() {
 
     // use STRING to store multiple character - char type with %s format specifier
     char myText [] = "khoi"; // syntax: [] after var name , 
-                            //wrapping around text must be double quote "" NOT single quote ''
+                             //wrapping around text must be double quote "" NOT single quote ''
     printf("%s\n", myText);
 
     return 0;
