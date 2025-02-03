@@ -76,9 +76,7 @@ Please answer the following questions and submit in your repo for the second ass
     In this implementation the storage for the student record is allocated on the heap using `malloc()` and passed back to the caller when the function returns. What do you think about this alternative implementation of `get_student(...)`?  Address in your answer why it work work, but also think about any potential problems it could cause.  
     
     > **ANSWER:** 
-   This implementation works because malloc() keeps the pointer valid after the function returns, avoiding issues with local variables.
-
-    However, it shifts memory management to the caller, risking memory leaks if free() isn’t used. It also creates a new allocation every time, which may be unnecessary. If malloc() fails, it returns NULL, adding extra error-handling complexity. The original approach is simpler, safer, and avoids these pitfalls.
+   This implementation works because malloc() keeps the pointer valid after the function returns, avoiding issues with local variables. However, it shifts memory management to the caller, risking memory leaks if free() isn’t used. It also creates a new allocation every time, which may be unnecessary. If malloc() fails, it returns NULL, adding extra error-handling complexity. The original approach is simpler, safer, and avoids these pitfalls.
 
 
 4. Lets take a look at how storage is managed for our simple database. Recall that all student records are stored on disk using the layout of the `student_t` structure (which has a size of 64 bytes).  Lets start with a fresh database by deleting the `student.db` file using the command `rm ./student.db`.  Now that we have an empty database lets add a few students and see what is happening under the covers.  Consider the following sequence of commands:
