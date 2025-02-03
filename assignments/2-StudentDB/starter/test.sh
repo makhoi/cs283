@@ -71,21 +71,16 @@ setup_file() {
     }
 }
 
-# @test "Make sure the file size is correct at this time" {
-#     run stat --format="%s" ./student.db
-#     [ "$status" -eq 0 ]
-#     [ "${lines[0]}" = "6400000" ] || {
-#         echo "Failed Output:  $output"
-#         echo "Expected: 64000000"
-#         return 1
-#     }
-# }
-
-@test "Debug File Size" {
-    run stat -f "%z" ./student.db
-    echo "Test Output: ${lines[0]}"
-    echo "Expected: 6400000"
+@test "Make sure the file size is correct at this time" {
+    run stat --format="%s" ./student.db
+    [ "$status" -eq 0 ]
+    [ "${lines[0]}" = "64000000" ] || {
+        echo "Failed Output:  $output"
+        echo "Expected: 64000000"
+        return 1
+    }
 }
+
 
 #@test "Make sure the file storage is correct at this time" {
 #    run du -h ./student.db
