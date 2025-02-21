@@ -1,0 +1,13 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     dsh
+relocations:
+  - { offsetInCU: 0x26, offset: 0x26, size: 0x8, addend: 0x0, symName: _print_binary_dragon, symObjAddr: 0x0, symBinAddr: 0x100002760, symSize: 0xB0 }
+  - { offsetInCU: 0x4D, offset: 0x4D, size: 0x8, addend: 0x0, symName: _DREXEL_DRAGON, symObjAddr: 0x1390, symBinAddr: 0x100008000, symSize: 0x0 }
+  - { offsetInCU: 0x6C, offset: 0x6C, size: 0x8, addend: 0x0, symName: _DRAGON_DATA, symObjAddr: 0x1398, symBinAddr: 0x100003E4D, symSize: 0x0 }
+  - { offsetInCU: 0x8E, offset: 0x8E, size: 0x8, addend: 0x0, symName: _print_binary_dragon, symObjAddr: 0x0, symBinAddr: 0x100002760, symSize: 0xB0 }
+  - { offsetInCU: 0xF8, offset: 0xF8, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0xB0, symBinAddr: 0x100002810, symSize: 0x340 }
+  - { offsetInCU: 0x26, offset: 0x217, size: 0x8, addend: 0x0, symName: _parse_single_command, symObjAddr: 0x0, symBinAddr: 0x100002B50, symSize: 0x104 }
+  - { offsetInCU: 0x41, offset: 0x232, size: 0x8, addend: 0x0, symName: _parse_single_command, symObjAddr: 0x0, symBinAddr: 0x100002B50, symSize: 0x104 }
+  - { offsetInCU: 0x8F, offset: 0x280, size: 0x8, addend: 0x0, symName: _build_cmd_list, symObjAddr: 0x104, symBinAddr: 0x100002C54, symSize: 0x1B4 }
+...
