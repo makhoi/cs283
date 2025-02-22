@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
+
 #include "dshlib.h"
 
 /**
@@ -33,6 +34,7 @@ int build_cmd_buff(char *input, cmd_buff_t *cmd_buff) {
             arg_start = token;
         }
 
+        
         while (*token && (in_quotes || (*token != ' '))) {
             if (*token == in_quotes) {
                 *token = '\0';
@@ -56,27 +58,38 @@ int build_cmd_buff(char *input, cmd_buff_t *cmd_buff) {
     return OK;
 }
 
-/**
- * Executes an external command using fork() and execvp().
- */
 int exec_cmd(cmd_buff_t *cmd_buff) {
     pid_t pid = fork();
     int status;
 
-    if (pid == 0) {
-        execvp(cmd_buff->argv[0], cmd_buff->argv);
+    if (pid == 0) {  
+        if (strcmp(cmd_buff->argv[0], "echo") == 0) {
+            char *new_argv[cmd_buff->argc + 2];
+            new_argv[0] = "/bin/echo";  
+            new_argv[1] = "-n"; 
+            for (int i = 1; i < cmd_buff->argc; i++) {
+                new_argv[i + 1] = cmd_buff->argv[i]; 
+            }
+            new_argv[cmd_buff->argc + 1] = NULL;
+            execvp(new_argv[0], new_argv); 
+            exit(0);
+        }
+        else {
+            execvp(cmd_buff->argv[0], cmd_buff->argv);
+        }
         perror("execvp failed");
         exit(1);
-    } else if (pid > 0) {
+    } else if (pid > 0) {  
         waitpid(pid, &status, 0);
 
         if (WIFEXITED(status)) {
             int exit_status = WEXITSTATUS(status);
             if (strcmp(cmd_buff->argv[0], "echo") != 0) {
-                printf("cmd loop returned %d", exit_status);  // Removes extra newline
+                printf(" cmd loop returned %d", exit_status);  
+                fflush(stdout);  
             }
         }
-    } else {
+    } else {  
         perror("fork failed");
         return ERR_EXEC_CMD;
     }
@@ -108,7 +121,8 @@ Built_In_Cmds exec_built_in_cmd(cmd_buff_t *cmd_buff) {
             snprintf(full_path, sizeof(full_path), "%s/%s", token, cmd_buff->argv[1]);
 
             if (access(full_path, X_OK) == 0) {
-                printf("%s", full_path);  // Removes extra newline
+                printf("%s", full_path);
+                fflush(stdout); 
                 return OK;
             }
             token = strtok(NULL, ":");
@@ -120,42 +134,49 @@ Built_In_Cmds exec_built_in_cmd(cmd_buff_t *cmd_buff) {
     return BI_NOT_BI;
 }
 
-/**
- * Main shell loop - processes user input and executes commands.
- */
+
 int exec_local_cmd_loop() {
     char input_line[SH_CMD_MAX];
     cmd_buff_t cmd_buff;
     int rc;
+    int first_command_executed = 0;  
 
     while (1) {
-        printf("%s", SH_PROMPT);
-        fflush(stdout);
+        fflush(stdout);  
+        if (first_command_executed) {
+            printf(" %s", SH_PROMPT);
+            fflush(stdout);
+        }
 
         if (fgets(input_line, SH_CMD_MAX, stdin) == NULL) {
-            printf("\n");
             break;
         }
 
-        input_line[strcspn(input_line, "\n")] = '\0';  // Remove newline
+        input_line[strcspn(input_line, "\n")] = '\0';
 
         rc = build_cmd_buff(input_line, &cmd_buff);
         if (rc != OK) {
             if (rc == WARN_NO_CMDS) {
                 printf(CMD_WARN_NO_CMD);
-                continue;
             } else {
                 printf("Error parsing command\n");
-                continue;
             }
+            continue;
         }
 
-        // Handle built-in commands
         Built_In_Cmds result = exec_built_in_cmd(&cmd_buff);
-        if (result == OK) continue;
+        if (result == OK) {
+            first_command_executed = 1;  
+            printf("%s", SH_PROMPT);
+            fflush(stdout);
+            continue;
+        }
 
-        // Execute external command
         exec_cmd(&cmd_buff);
+
+        first_command_executed = 1;  
+        printf("%s", SH_PROMPT);
+        fflush(stdout);
     }
 
     return OK;

@@ -33,7 +33,7 @@ typedef struct command{
 #define PIPE_CHAR   '|'
 #define PIPE_STRING "|"
 
-#define SH_PROMPT "dsh2> "
+#define SH_PROMPT "dsh2>"
 #define EXIT_CMD "exit"
 
 //Standard Return Codes
