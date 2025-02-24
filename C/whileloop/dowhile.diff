@@ -1,0 +1,12 @@
+--- dowhile_original.c	2025-02-23 23:53:05
++++ dowhile_fixed.c	2025-02-23 23:53:31
+@@ -9,7 +9,7 @@
+ #include <stdio.h>
+ 
+ int main() {
+-    int i = 6;
++    int i = 3;
+ 
+     do {
+         printf("%i\n", i);
+\ No newline at end of file
