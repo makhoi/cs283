@@ -1,0 +1,19 @@
+--- example_original.c	2025-02-23 16:42:48
++++ example_fixed.c	2025-02-23 23:00:42
+@@ -15,13 +15,13 @@
+     printf("0\n");
+ 
+     //check voting age
+-    int myAge = 22;
++    int myAge = 20;
+     int votingAge = 21;
+ 
+     (votingAge >= myAge) ? printf("Go vote!\n") : printf("Go home kiddo!\n");
+ 
+     //check even/odd number
+-    int num = 10;
++    int num = 33;
+ 
+     (num % 2 == 0) ? printf("even\n") : printf("odd\n");
+ 
+\ No newline at end of file

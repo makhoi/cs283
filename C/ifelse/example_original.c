@@ -15,13 +15,13 @@ int main() {
     printf("0\n");
 
     //check voting age
-    int myAge = 20;
+    int myAge = 22;
     int votingAge = 21;
 
     (votingAge >= myAge) ? printf("Go vote!\n") : printf("Go home kiddo!\n");
 
     //check even/odd number
-    int num = 33;
+    int num = 10;
 
     (num % 2 == 0) ? printf("even\n") : printf("odd\n");
 
