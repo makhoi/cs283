@@ -1,0 +1,17 @@
+--- assignment.c	2025-02-24 01:54:33
++++ example.c	2025-02-24 02:00:03
+@@ -1,5 +1,12 @@
+ #include <stdio.h>
+ 
+ int main() {
+-    
++    //assignment1: program counts to 100 by every 10
++    //example: 0, 10, 20, ..., 100
++    printf("ASSIGNMENT 1: PROGRAM COUNT TO 100 BY EVERY 10");
++    for(int i = 0; i <= 100; i+=10) {
++        pritnf("%i\n", i);
++    }
++
++    return 0;
+ }
+\ No newline at end of file
