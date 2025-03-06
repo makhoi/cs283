@@ -54,6 +54,61 @@
  */
 int exec_local_cmd_loop()
 {
-   
+    char input_line[SH_CMD_MAX];
+    command_list_t clist;
+    int rc;
+
+    while (1) {
+        // Display prompt
+        printf("%s", SH_PROMPT);
+        fflush(stdout);
+
+        // Read user input
+        if (fgets(input_line, SH_CMD_MAX, stdin) == NULL) {
+            break;
+        }
+
+        // Remove trailing newline
+        input_line[strcspn(input_line, "\n")] = '\0';
+
+        // Parse input into command_list_t
+        rc = build_cmd_list(input_line, &clist);
+        if (rc != OK) {
+            if (rc == WARN_NO_CMDS) {
+                printf(CMD_WARN_NO_CMD);
+            } else {
+                printf("Error parsing command\n");
+            }
+            continue;
+        }
+
+        // Check if the first command is a built-in command
+        Built_In_Cmds result = exec_built_in_cmd(&clist.commands[0]);
+        if (result == OK) {
+            continue;
+        }
+
+        // Execute pipeline
+        execute_pipeline(&clist);
+    }
+
     return OK;
 }
+
+// Function to parse input into multiple commands separated by pipes
+int build_cmd_list(char *cmd_line, command_list_t *clist) {
+    memset(clist, 0, sizeof(command_list_t));
+    
+    char *token = strtok(cmd_line, PIPE_STRING);
+    while (token != NULL) {
+        if (clist->num >= CMD_MAX) {
+            printf(CMD_ERR_PIPE_LIMIT);
+            return ERR_TOO_MANY_COMMANDS;
+        }
+        build_cmd_buff(token, &clist->commands[clist->num]);
+        clist->num++;
+        token = strtok(NULL, PIPE_STRING);
+    }
+    return OK;
+}
+
