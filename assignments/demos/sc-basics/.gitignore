@@ -1,7 +1,0 @@
-# Ignore the executable
-sc-basics
-basic-write
-
-# But not the source file
-!sc-basics.c
-!basic-write.c
