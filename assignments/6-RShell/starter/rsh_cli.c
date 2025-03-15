@@ -90,37 +90,89 @@
  *   function after cleaning things up.  See the documentation for client_cleanup()
  *      
  */
-int exec_remote_cmd_loop(char *address, int port)
-{
-    char *cmd_buff;
-    char *rsp_buff;
-    int cli_socket;
-    ssize_t io_size;
+// int exec_remote_cmd_loop(char *address, int port)
+// {
+//     char *cmd_buff;
+//     char *rsp_buff;
+//     int cli_socket;
+//     ssize_t io_size;
+//     int is_eof;
+
+//     // TODO set up cmd and response buffs
+
+//     cli_socket = start_client(address,port);
+//     if (cli_socket < 0){
+//         perror("start client");
+//         return client_cleanup(cli_socket, cmd_buff, rsp_buff, ERR_RDSH_CLIENT);
+//     }
+
+//     while (1) 
+//     {
+//         // TODO print prompt
+
+//         // TODO fgets input
+
+//         // TODO send() over cli_socket
+
+//         // TODO recv all the results
+
+//         // TODO break on exit command
+//     }
+
+//     return client_cleanup(cli_socket, cmd_buff, rsp_buff, OK);
+// }
+int exec_remote_cmd_loop(char *server_ip, int port) {
+    char *cmd_buff = malloc(SH_CMD_MAX);
+    char *rsp_buff = malloc(RDSH_COMM_BUFF_SZ);
+    int cli_socket = -1;
+    ssize_t recv_size;
     int is_eof;
 
-    // TODO set up cmd and response buffs
+    if (!cmd_buff || !rsp_buff) {
+        perror("malloc");
+        return client_cleanup(cli_socket, cmd_buff, rsp_buff, ERR_MEMORY);
+    }
 
-    cli_socket = start_client(address,port);
-    if (cli_socket < 0){
-        perror("start client");
+    // Connect to server
+    cli_socket = start_client(server_ip, port);
+    if (cli_socket < 0) {
         return client_cleanup(cli_socket, cmd_buff, rsp_buff, ERR_RDSH_CLIENT);
     }
 
-    while (1) 
-    {
-        // TODO print prompt
+    while (1) {
+        // Print shell prompt
+        printf("%s", SH_PROMPT);
 
-        // TODO fgets input
+        // Read user input
+        if (fgets(cmd_buff, SH_CMD_MAX, stdin) == NULL) {
+            printf("\n");
+            break;
+        }
 
-        // TODO send() over cli_socket
+        // Remove trailing newline
+        cmd_buff[strcspn(cmd_buff, "\n")] = '\0';
 
-        // TODO recv all the results
+        // Send command to server
+        if (send(cli_socket, cmd_buff, strlen(cmd_buff) + 1, 0) < 0) {
+            perror("send");
+            break;
+        }
 
-        // TODO break on exit command
+        // Receive response from server
+        while ((recv_size = recv(cli_socket, rsp_buff, RDSH_COMM_BUFF_SZ, 0)) > 0) {
+            is_eof = (rsp_buff[recv_size - 1] == RDSH_EOF_CHAR);
+            if (is_eof) rsp_buff[recv_size - 1] = '\0';  // Null-terminate
+            printf("%.*s", (int)recv_size, rsp_buff);
+            if (is_eof) break;
+        }
+
+        // Exit if `exit` command is sent
+        if (strcmp(cmd_buff, EXIT_CMD) == 0) break;
     }
 
     return client_cleanup(cli_socket, cmd_buff, rsp_buff, OK);
 }
+
 
 /*
  * start_client(server_ip, port)
@@ -145,16 +197,48 @@ int exec_remote_cmd_loop(char *address, int port)
  *          ERR_RDSH_CLIENT:    If socket() or connect() fail
  * 
  */
-int start_client(char *server_ip, int port){
-    struct sockaddr_in addr;
+// int start_client(char *server_ip, int port){
+//     struct sockaddr_in addr;
+//     int cli_socket;
+//     int ret;
+
+//     // TODO set up cli_socket
+
+
+//     return cli_socket;
+// }
+int start_client(char *server_ip, int port) {
     int cli_socket;
-    int ret;
+    struct sockaddr_in server_addr;
 
-    // TODO set up cli_socket
+    // Create socket
+    cli_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (cli_socket < 0) {
+        perror("socket");
+        return ERR_RDSH_CLIENT;
+    }
 
+    // Set up server address struct
+    memset(&server_addr, 0, sizeof(server_addr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(port);
+    if (inet_pton(AF_INET, server_ip, &server_addr.sin_addr) <= 0) {
+        perror("inet_pton");
+        close(cli_socket);
+        return ERR_RDSH_CLIENT;
+    }
 
+    // Connect to server
+    if (connect(cli_socket, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+        perror("connect");
+        close(cli_socket);
+        return ERR_RDSH_CLIENT;
+    }
+
+    printf("Connected to server at %s:%d\n", server_ip, port);
     return cli_socket;
 }
+
 
 /*
  * client_cleanup(int cli_socket, char *cmd_buff, char *rsp_buff, int rc)
