@@ -4,30 +4,68 @@
 # 
 # Create your unit tests suit in this file
 
-#!/usr/bin/env bats
+# Ensure pipes (`|`) work as expected
+@test "Pipes with grep" {
+    run "./dsh" <<EOF                
+ls | grep dshlib.c
+EOF
 
-@test "Built-in command executes correctly" {
-    run dsh -c "dragon"
-    [ "$output" = "Here be dragons!" ]
+    stripped_output=$(echo "$output" | tr -d '[:space:]')
+    expected_output="dshlib.cdsh3>dsh3>cmdloopreturned0"
+
+    echo "Captured stdout:" 
+    echo "Output: $output"
+    echo "Exit Status: $status"
+    echo "${stripped_output} -> ${expected_output}"
+
+    [ "$stripped_output" = "$expected_output" ]
+    [ "$status" -eq 0 ]
 }
 
-@test "Basic external command execution" {
-    run dsh -c "ls"
-    [[ "$output" =~ "dsh" ]]
+# Ensure `cd` command works and prompt appears correctly
+@test "Built-in cd command" {
+    run "./dsh" <<EOF
+cd ..
+EOF
+
+    stripped_output=$(echo "$output" | tr -d '[:space:]')
+    expected_output="dsh3>dsh3>cmdloopreturned0"
+
+    echo "Captured stdout:" 
+    echo "Output: $output"
+    echo "Exit Status: $status"
+    echo "${stripped_output} -> ${expected_output}"
+
+    [ "$stripped_output" = "$expected_output" ]
+    [ "$status" -eq 0 ]
 }
 
-@test "Simple piping works" {
-    run dsh -c "echo hello | tr a-z A-Z"
-    [ "$output" = "HELLO" ]
+# Ensure `exit` command properly terminates the shell
+@test "Exit command" {
+    run "./dsh" <<EOF
+exit
+EOF
+
+    echo "Captured stdout:" 
+    echo "Output: $output"
+    echo "Exit Status: $status"
+
+    [ "$status" -eq 0 ]
 }
 
-@test "Chained pipes execute correctly" {
-    run dsh -c "echo 'one two three' | wc -w"
-    [ "$output" = "3" ]
+# Ensure `ls` command output appears before the prompt
+@test "Check ls command output and prompt behavior" {
+    run "./dsh" <<EOF
+ls
+EOF
+
+    stripped_output=$(echo "$output" | tr -d '[:space:]')
+    
+    # Ensure ls outputs something
+    [[ -n "${output}" ]]
+
+    # Check that the prompt appears twice
+    [[ "$stripped_output" == *"dsh3>dsh3>cmdloopreturned0"* ]]
 }
 
-@test "Too many piped commands return error" {
-    long_cmd=$(printf 'echo x | %.0s' {1..9})"wc -l"
-    run dsh -c "$long_cmd"
-    [[ "$output" =~ "error: piping limited" ]]
-}
+
