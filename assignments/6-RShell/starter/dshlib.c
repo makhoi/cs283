@@ -9,80 +9,6 @@
 
 #include "dshlib.h"
 
-
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
-#include <stdbool.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/wait.h>
-
-#include "dshlib.h"
-
-/**** 
- **** FOR REMOTE SHELL USE YOUR SOLUTION FROM SHELL PART 3 HERE
- **** THE MAIN FUNCTION CALLS THIS ONE AS ITS ENTRY POINT TO
- **** EXECUTE THE SHELL LOCALLY
- ****
- */
-
-/*
- * Implement your exec_local_cmd_loop function by building a loop that prompts the 
- * user for input.  Use the SH_PROMPT constant from dshlib.h and then
- * use fgets to accept user input.
- * 
- *      while(1){
- *        printf("%s", SH_PROMPT);
- *        if (fgets(cmd_buff, ARG_MAX, stdin) == NULL){
- *           printf("\n");
- *           break;
- *        }
- *        //remove the trailing \n from cmd_buff
- *        cmd_buff[strcspn(cmd_buff,"\n")] = '\0';
- * 
- *        //IMPLEMENT THE REST OF THE REQUIREMENTS
- *      }
- * 
- *   Also, use the constants in the dshlib.h in this code.  
- *      SH_CMD_MAX              maximum buffer size for user input
- *      EXIT_CMD                constant that terminates the dsh program
- *      SH_PROMPT               the shell prompt
- *      OK                      the command was parsed properly
- *      WARN_NO_CMDS            the user command was empty
- *      ERR_TOO_MANY_COMMANDS   too many pipes used
- *      ERR_MEMORY              dynamic memory management failure
- * 
- *   errors returned
- *      OK                     No error
- *      ERR_MEMORY             Dynamic memory management failure
- *      WARN_NO_CMDS           No commands parsed
- *      ERR_TOO_MANY_COMMANDS  too many pipes used
- *   
- *   console messages
- *      CMD_WARN_NO_CMD        print on WARN_NO_CMDS
- *      CMD_ERR_PIPE_LIMIT     print on ERR_TOO_MANY_COMMANDS
- *      CMD_ERR_EXECUTE        print on execution failure of external command
- * 
- *  Standard Library Functions You Might Want To Consider Using (assignment 1+)
- *      malloc(), free(), strlen(), fgets(), strcspn(), printf()
- * 
- *  Standard Library Functions You Might Want To Consider Using (assignment 2+)
- *      fork(), execvp(), exit(), chdir()
- */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
-#include <stdbool.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/wait.h>
-
-#include "dshlib.h"
-
 /*
  * Implement your exec_local_cmd_loop function by building a loop that prompts the 
  * user for input.  Use the SH_PROMPT constant from dshlib.h and then
@@ -224,23 +150,20 @@ int exec_local_cmd_loop() {
     int first_command_executed = 0;
 
     while (1) {
-        // Display prompt with proper spacing
         fflush(stdout);
+        
         if (first_command_executed) {
-            printf("%s", SH_PROMPT);
-        } else {
-            printf("%s", SH_PROMPT);
+            printf("%s ", SH_PROMPT);  // Print prompt after the first command executes
         }
-        fflush(stdout);
-
+    
         // Read user input
         if (fgets(input_line, SH_CMD_MAX, stdin) == NULL) {
             break;
         }
-
+    
         // Remove trailing newline
         input_line[strcspn(input_line, "\n")] = '\0';
-
+    
         // Parse input into command_list_t
         rc = build_cmd_list(input_line, &clist);
         if (rc != OK) {
@@ -253,20 +176,21 @@ int exec_local_cmd_loop() {
             }
             continue;
         }
-
-        // Check if the first command is a built-in command
+    
+        // Execute the first command and capture if it was a built-in
         Built_In_Cmds result = exec_built_in_cmd(&clist.commands[0]);
         if (result == BI_EXECUTED) {
             first_command_executed = 1;
+            printf("\n%s ", SH_PROMPT);  // Ensure prompt is printed after execution
             continue;
         }
-
-        // Execute pipeline
+    
+        // Execute pipeline and wait for all child processes
         execute_pipeline(&clist);
-        
-        // Free allocated memory for command list
         free_cmd_list(&clist);
+    
         first_command_executed = 1;
+        printf("\n%s ", SH_PROMPT);  // Print the next prompt after execution
     }
 
     return OK;
@@ -276,46 +200,45 @@ int exec_local_cmd_loop() {
 int build_cmd_list(char *cmd_line, command_list_t *clist) {
     memset(clist, 0, sizeof(command_list_t));
     
-    // Check for empty input
     if (cmd_line == NULL || *cmd_line == '\0') {
         return WARN_NO_CMDS;
     }
     
-    // Make a copy of the command line for strtok
     char cmd_copy[SH_CMD_MAX];
     strncpy(cmd_copy, cmd_line, SH_CMD_MAX - 1);
     cmd_copy[SH_CMD_MAX - 1] = '\0';
+
+    char *saveptr;
+    char *token = strtok_r(cmd_copy, PIPE_STRING, &saveptr);
     
-    char *token = strtok(cmd_copy, PIPE_STRING);
     if (token == NULL) {
         return WARN_NO_CMDS;
     }
-    
+
     while (token != NULL) {
         if (clist->num >= CMD_MAX) {
             printf(CMD_ERR_PIPE_LIMIT, CMD_MAX);
             return ERR_TOO_MANY_COMMANDS;
         }
-        
+
+        // Call build_cmd_buff but ensure it does not use strtok
         int rc = build_cmd_buff(token, &clist->commands[clist->num]);
         if (rc == OK) {
             clist->num++;
         } else if (rc != WARN_NO_CMDS) {
-            // If build_cmd_buff returns an error other than WARN_NO_CMDS,
-            // we should propagate it
-            return rc;
+            return rc; // Propagate errors
         }
-        // If WARN_NO_CMDS, we just skip this command
-        
-        token = strtok(NULL, PIPE_STRING);
+
+        token = strtok_r(NULL, PIPE_STRING, &saveptr);
     }
-    
+
     if (clist->num == 0) {
         return WARN_NO_CMDS;
     }
-    
+
     return OK;
 }
+
 
 // Function to execute a pipeline of commands
 int execute_pipeline(command_list_t *clist) {
@@ -339,6 +262,7 @@ int execute_pipeline(command_list_t *clist) {
     // Fork processes for each command
     for (int i = 0; i < num_commands; i++) {
         pids[i] = fork();
+
         if (pids[i] == -1) {
             perror("fork");
             // Close already created pipes

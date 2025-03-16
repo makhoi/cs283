@@ -11,9 +11,6 @@
 #include "dshlib.h"
 #include "rshlib.h"
 
-
-
-
 /*
  * exec_remote_cmd_loop(server_ip, port)
  *      server_ip:  a string in ip address format, indicating the servers IP
